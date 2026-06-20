@@ -1,6 +1,6 @@
-# Ethara AI POS & Inventory Management System
+#Inventory Management System
 
-A full-stack, modern Point of Sale (POS) and Inventory Management System built using the MERN stack (MongoDB, Express, React, Node.js). It provides a robust backend API with Swagger documentation and a beautiful, responsive frontend built with Vite, Tailwind CSS, and Chart.js.
+A full-stack, Inventory Management System built using the MERN stack (MongoDB, Express, React, Node.js). It provides a robust backend API with Swagger documentation and a beautiful, responsive frontend built with Vite, Tailwind CSS, and Chart.js.
 
 ## ✨ Features
 
