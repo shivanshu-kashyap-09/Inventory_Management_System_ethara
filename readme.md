@@ -1,112 +1,93 @@
-#Inventory Management System
+# Inventory & Order Management System
 
-A full-stack, Inventory Management System built using the MERN stack (MongoDB, Express, React, Node.js). It provides a robust backend API with Swagger documentation and a beautiful, responsive frontend built with Vite, Tailwind CSS, and Chart.js.
+A full-stack, Production-Ready Containerized Inventory & Order Management System built according to the Technical Assessment requirements.
 
 ## ✨ Features
 
-- **Role-based Authentication**: Secure JWT-based login and registration with specific roles (Admin/Employee).
-- **Dashboard Analytics**: Visualized statistics for total products, categories, low-stock items, and recent transactions using Chart.js.
-- **Product Management**: Comprehensive CRUD operations for managing products, including SKU, pricing, current stock, and low-stock thresholds.
-- **Category Management**: Organize products dynamically by categories. 
-- **Inventory Tracking (Transactions)**: Easily record IN and OUT movements of stock, automatically reflecting updates in the product's available stock.
-- **RESTful API**: Clean backend architecture following MVC patterns with complete API documentation using Swagger UI.
+- **Product Management**: Manage catalog with unique SKUs, pricing, and stock levels.
+- **Customer Management**: Maintain a list of customers with unique email addresses.
+- **Order Management**: Create orders linking customers and products. Placing an order automatically validates and reduces available stock.
+- **Dashboard**: Real-time overview of Total Products, Customers, Orders, and Low Stock Alerts.
 
 ## 🛠️ Technology Stack
 
 **Frontend**
 - React (Vite)
 - Tailwind CSS
-- React Router DOM
 - Axios
 - Chart.js (react-chartjs-2)
 - Lucide React (Icons)
 
 **Backend**
-- Node.js & Express.js
-- MongoDB & Mongoose
-- JSON Web Token (JWT) & bcryptjs
-- Swagger UI Express & Swagger JSDoc
-- Multer (for image handling)
-- CORS & dotenv
+- Python (FastAPI)
+- PostgreSQL & SQLAlchemy
+- Pydantic
+- Uvicorn
 
-## 🚀 Getting Started
+**Infrastructure**
+- Docker & Docker Compose
+
+## 🚀 Getting Started (Docker Compose)
+
+The easiest way to run the entire application (Frontend, Backend, and Database) is using Docker.
 
 ### Prerequisites
-Make sure you have [Node.js](https://nodejs.org/) and [MongoDB](https://www.mongodb.com/) installed on your local machine or have a MongoDB URI.
+Make sure you have [Docker](https://www.docker.com/) and Docker Compose installed on your local machine.
 
-### 1. Clone the repository
+### Run the Application
+
+1. Clone the repository
 ```bash
 git clone https://github.com/shivanshu-kashyap-09/Inventory_Management_System_ethara.git
+cd Inventory_Management_System_ethara
 ```
 
-### 2. Backend Setup
+2. Build and run the containers
 ```bash
-cd backend
-
-# Install dependencies
-npm install
-
-# Create a .env file and add the following
-NODE_ENV=development
-PORT=5000
-MONGO_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/ethara_ai?appName=Cluster0
-JWT_SECRET=supersecret123
-
-# Start the backend development server
-npm run dev
+docker-compose up --build
 ```
-The API will run at `http://localhost:5000/api` and Swagger docs at `http://localhost:5000/api-docs`.
 
-### 3. Frontend Setup
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Start the frontend development server
-npm run dev
-```
-The Frontend will run at `http://localhost:5173/`.
-
-## 🧪 Testing Credentials
-You can use the following default credentials to log in and test the application:
-
-- **Admin Account:**
-  - **Email:** `admin@ethara.ai`
-  - **Password:** `password123`
-
-- **Employee Account:**
-  - **Email:** `employee@ethara.ai`
-  - **Password:** `password123`
+3. Access the application
+- **Frontend**: [http://localhost](http://localhost) (Port 80)
+- **Backend API**: [http://localhost:8000](http://localhost:8000)
+- **API Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs) (Swagger UI)
 
 ## 📂 Project Structure
 
 ```text
 ethara.ai/
 ├── backend/
+│   ├── routers/       # FastAPI endpoints
+│   ├── database.py    # PostgreSQL DB Setup
+│   ├── main.py        # FastAPI entry point
+│   ├── models.py      # SQLAlchemy Models
+│   ├── schemas.py     # Pydantic validation schemas
+│   ├── requirements.txt
+│   └── Dockerfile     # Python Backend Dockerfile
+├── frontend/
 │   ├── src/
-│   │   ├── config/       # Database & Swagger configurations
-│   │   ├── controllers/  # Request handlers logic
-│   │   ├── middlewares/  # Auth, roles, & error handling
-│   │   ├── models/       # Mongoose schemas
-│   │   ├── routes/       # API endpoints definitions
-│   │   ├── services/     # Core business logic
-│   │   └── index.js      # Server entry point
-│   ├── .env
-│   └── package.json
-└── frontend/
-    ├── src/
-    │   ├── components/   # Reusable UI components (Buttons, Inputs, Modals)
-    │   ├── context/      # React Context (AuthContext)
-    │   ├── pages/        # Main application pages
-    │   ├── services/     # API connection and interceptors (Axios)
-    │   ├── App.jsx       # Routing setup
-    │   └── main.jsx      # Frontend entry point
-    ├── tailwind.config.js
-    ├── vite.config.js
-    └── package.json
+│   │   ├── components/
+│   │   ├── pages/     # Products, Customers, Orders, Dashboard
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   └── Dockerfile     # Nginx multi-stage build
+└── docker-compose.yml # Container orchestration
 ```
 
-## 🤝 Contributing
-Contributions, issues, and feature requests are welcome!
+## 🌐 Deployment Guidelines
+
+For deploying to free hosting platforms as per the assessment:
+
+### Backend (Render / Railway / Fly.io)
+- Connect your GitHub repo.
+- Select the `backend` directory.
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- Environment Variables: Provide a valid `DATABASE_URL` for PostgreSQL.
+
+### Frontend (Vercel / Netlify)
+- Connect your GitHub repo.
+- Select the `frontend` directory.
+- Build Command: `npm run build`
+- Output Directory: `dist`
+- Environment Variables: Set `VITE_API_URL` to your deployed backend URL.

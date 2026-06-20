@@ -1,17 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useContext } from 'react';
-import { AuthContext } from '../../context/auth';
-import { LayoutDashboard, Package, Tags, ArrowRightLeft } from 'lucide-react';
+import { LayoutDashboard, Package, Users, ShoppingCart } from 'lucide-react';
 
 const Sidebar = () => {
-  const { user } = useContext(AuthContext);
   const location = useLocation();
 
   const navItems = [
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
     { name: 'Products', path: '/products', icon: <Package size={20} /> },
-    { name: 'Categories', path: '/categories', icon: <Tags size={20} /> },
-    { name: 'Transactions', path: '/transactions', icon: <ArrowRightLeft size={20} /> },
+    { name: 'Customers', path: '/customers', icon: <Users size={20} /> },
+    { name: 'Orders', path: '/orders', icon: <ShoppingCart size={20} /> },
   ];
 
   return (
@@ -59,11 +56,11 @@ const Sidebar = () => {
       <div className="p-4 relative z-10 border-t border-slate-800 bg-slate-900/50 backdrop-blur-md">
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-800 transition-colors cursor-pointer">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white shadow-inner">
-            {user?.name?.charAt(0).toUpperCase() || 'U'}
+            A
           </div>
           <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-semibold text-white truncate">{user?.name || 'User'}</span>
-            <span className="text-xs text-indigo-400 capitalize truncate">{user?.role || 'employee'}</span>
+            <span className="text-sm font-semibold text-white truncate">Admin User</span>
+            <span className="text-xs text-indigo-400 capitalize truncate">System Admin</span>
           </div>
         </div>
       </div>

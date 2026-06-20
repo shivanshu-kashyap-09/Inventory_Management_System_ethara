@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Package, Tags, AlertTriangle, Activity, TrendingUp } from 'lucide-react';
+import { Package, Users, ShoppingCart, AlertTriangle, TrendingUp } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -51,7 +51,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { data } = await api.get('/dashboard');
+        const { data } = await api.get('/dashboard/');
         setStats(data);
       } catch (error) {
         console.error('Error fetching stats', error);
@@ -78,15 +78,15 @@ const Dashboard = () => {
   );
 
   const chartData = {
-    labels: ['Total Products', 'Categories', 'Low Stock'],
+    labels: ['Total Products', 'Total Customers', 'Total Orders'],
     datasets: [
       {
-        label: 'Inventory Overview',
-        data: [stats.totalProducts, stats.totalCategories, stats.lowStockCount],
+        label: 'System Overview',
+        data: [stats.totalProducts, stats.totalCustomers, stats.totalOrders],
         backgroundColor: [
           'rgba(99, 102, 241, 0.8)', // Indigo
           'rgba(168, 85, 247, 0.8)', // Purple
-          'rgba(244, 63, 94, 0.8)', // Rose
+          'rgba(16, 185, 129, 0.8)', // Emerald
         ],
         borderRadius: 6,
         borderWidth: 0,
@@ -111,7 +111,7 @@ const Dashboard = () => {
       y: {
         beginAtZero: true,
         grid: { color: 'rgba(241, 245, 249, 1)', drawBorder: false },
-        ticks: { font: { family: 'Inter' }, color: '#64748b' }
+        ticks: { font: { family: 'Inter' }, color: '#64748b', stepSize: 1 }
       },
       x: {
         grid: { display: false },
@@ -129,14 +129,20 @@ const Dashboard = () => {
           icon={Package} 
           color="bg-indigo-100 text-indigo-600"
           bgGradient="bg-indigo-400"
-          trend="+12%"
         />
         <StatCard 
-          title="Total Categories" 
-          value={stats.totalCategories} 
-          icon={Tags} 
+          title="Total Customers" 
+          value={stats.totalCustomers} 
+          icon={Users} 
           color="bg-purple-100 text-purple-600"
           bgGradient="bg-purple-400"
+        />
+        <StatCard 
+          title="Total Orders" 
+          value={stats.totalOrders} 
+          icon={ShoppingCart} 
+          color="bg-emerald-100 text-emerald-600"
+          bgGradient="bg-emerald-400"
         />
         <StatCard 
           title="Low Stock Items" 
@@ -145,19 +151,11 @@ const Dashboard = () => {
           color="bg-rose-100 text-rose-600"
           bgGradient="bg-rose-400"
         />
-        <StatCard 
-          title="Recent Movements" 
-          value={stats.recentTransactions?.length || 0} 
-          icon={Activity} 
-          color="bg-emerald-100 text-emerald-600"
-          bgGradient="bg-emerald-400"
-          trend="+5%"
-        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2 flex flex-col">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Inventory Overview</h3>
+          <h3 className="text-lg font-bold text-slate-800 mb-6">System Overview</h3>
           <div className="flex-1 min-h-[300px]">
             <Bar options={chartOptions} data={chartData} />
           </div>
@@ -180,7 +178,7 @@ const Dashboard = () => {
             ) : (
               <div className="space-y-4">
                 {stats.lowStockProducts?.slice(0, 6).map(product => (
-                  <div key={product._id} className="group flex items-center justify-between p-4 bg-white hover:bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-xl transition-all cursor-pointer">
+                  <div key={product.id} className="group flex items-center justify-between p-4 bg-white hover:bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-xl transition-all cursor-pointer">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
                         <AlertTriangle size={18} />
@@ -191,7 +189,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-extrabold text-rose-600">{product.currentStock}</p>
+                      <p className="font-extrabold text-rose-600">{product.quantity_in_stock}</p>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Left</p>
                     </div>
                   </div>

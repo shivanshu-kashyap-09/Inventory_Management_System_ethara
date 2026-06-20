@@ -1,13 +1,9 @@
-import { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
-import { AuthContext } from '../../context/auth';
-import { LogOut, Bell, Search } from 'lucide-react';
+import { Bell, Search } from 'lucide-react';
 
 const Navbar = () => {
-  const { logout } = useContext(AuthContext);
   const location = useLocation();
   
-  // Get current page title from path
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === '/') return 'Dashboard Overview';
@@ -35,14 +31,6 @@ const Navbar = () => {
           <button className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all relative group">
             <Bell size={20} className="group-hover:animate-[wiggle_1s_ease-in-out_infinite]" />
             <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full"></span>
-          </button>
-          
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-rose-600 transition-colors px-4 py-2.5 rounded-full hover:bg-rose-50"
-          >
-            <LogOut size={18} />
-            <span className="hidden sm:block">Logout</span>
           </button>
         </div>
       </div>

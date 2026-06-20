@@ -1,88 +1,66 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "../services/api";
-import { AuthContext } from "../context/auth";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Modal from "../components/ui/Modal";
-import {
-  AlertTriangle,
-  Edit,
-  Package,
-  Plus,
-  Search,
-  Trash2,
-} from "lucide-react";
+import { Edit, Package, Plus, Trash2 } from "lucide-react";
 
 const emptyProduct = {
   name: "",
   sku: "",
-  description: "",
-  category: "",
   price: "",
-  currentStock: "0",
-  lowStockThreshold: "10",
+  quantity_in_stock: "0",
 };
 
 const Products = () => {
-  const { user } = useContext(AuthContext);
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [query, setQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [form, setForm] = useState(emptyProduct);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get("/products", {
-        params: { page, search: query },
-      });
-      setProducts(data.products);
-      setTotalPages(data.totalPages);
+      const { data } = await api.get("/products/");
+      setProducts(data);
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to load products.");
+      setError(err.response?.data?.detail || "Unable to load products.");
     } finally {
       setLoading(false);
     }
-  }, [page, query]);
-
-  useEffect(() => {
-    void Promise.resolve().then(fetchProducts);
-  }, [fetchProducts]);
-  useEffect(() => {
-    api
-      .get("/categories")
-      .then(({ data }) => setCategories(data))
-      .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
   const openCreate = () => {
-    setForm({ ...emptyProduct, category: categories[0]?._id || "" });
+    setForm(emptyProduct);
     setEditingId(null);
     setError("");
+    setIsModalOpen(true);
   };
+
   const openEdit = (product) => {
-    setEditingId(product._id);
+    setEditingId(product.id);
     setForm({
       name: product.name,
       sku: product.sku,
-      description: product.description,
-      category: product.category?._id || product.category,
       price: String(product.price),
-      currentStock: String(product.currentStock),
-      lowStockThreshold: String(product.lowStockThreshold),
+      quantity_in_stock: String(product.quantity_in_stock),
     });
     setError("");
+    setIsModalOpen(true);
   };
+
   const closeForm = () => {
     setEditingId(null);
     setForm(emptyProduct);
+    setIsModalOpen(false);
   };
+
   const updateField = (event) =>
     setForm((current) => ({
       ...current,
@@ -95,28 +73,27 @@ const Products = () => {
     const payload = {
       ...form,
       price: Number(form.price),
-      currentStock: Number(form.currentStock),
-      lowStockThreshold: Number(form.lowStockThreshold),
+      quantity_in_stock: Number(form.quantity_in_stock),
     };
     try {
       if (editingId) await api.put(`/products/${editingId}`, payload);
-      else await api.post("/products", payload);
+      else await api.post("/products/", payload);
       closeForm();
       fetchProducts();
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to save product.");
+      setError(err.response?.data?.detail || "Unable to save product.");
     }
   };
+
   const deleteProduct = async (id) => {
     if (!window.confirm("Delete this product? This cannot be undone.")) return;
     try {
       await api.delete(`/products/${id}`);
       fetchProducts();
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to delete product.");
+      setError(err.response?.data?.detail || "Unable to delete product.");
     }
   };
-  const canManage = user?.role === "admin";
 
   return (
     <div className="space-y-6 pb-8">
@@ -129,13 +106,12 @@ const Products = () => {
             Manage your catalog, stock levels, and pricing.
           </p>
         </div>
-        {canManage && (
-          <Button onClick={openCreate}>
-            <Plus size={20} />
-            Add Product
-          </Button>
-        )}
+        <Button onClick={openCreate}>
+          <Plus size={20} />
+          Add Product
+        </Button>
       </div>
+
       {error && (
         <p
           role="alert"
@@ -144,40 +120,16 @@ const Products = () => {
           {error}
         </p>
       )}
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          setPage(1);
-          setQuery(search);
-        }}
-        className="flex max-w-md gap-2 rounded-2xl border border-slate-100 bg-white p-2 shadow-sm"
-      >
-        <div className="relative flex-1">
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-            size={18}
-          />
-          <input
-            aria-label="Search products"
-            className="w-full rounded-xl bg-slate-50 py-2.5 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or SKU..."
-          />
-        </div>
-        <Button type="submit" variant="secondary">
-          Search
-        </Button>
-      </form>
+
       <div className="overflow-x-auto rounded-2xl border border-slate-100 bg-white shadow-sm">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
-              <th className="p-5">Product</th>
-              <th className="p-5">Category</th>
+              <th className="p-5">Product Name</th>
+              <th className="p-5">SKU / Code</th>
               <th className="p-5">Price</th>
               <th className="p-5">Stock</th>
-              {canManage && <th className="p-5 text-right">Actions</th>}
+              <th className="p-5 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -197,83 +149,45 @@ const Products = () => {
             ) : (
               products.map((product) => (
                 <tr
-                  key={product._id}
+                  key={product.id}
                   className="border-b last:border-0 hover:bg-slate-50"
                 >
-                  <td className="p-5">
-                    <p className="font-bold text-slate-800">{product.name}</p>
-                    <p className="text-xs text-slate-500">SKU: {product.sku}</p>
-                  </td>
-                  <td className="p-5 text-sm text-slate-600">
-                    {product.category?.name || "Uncategorized"}
-                  </td>
+                  <td className="p-5 font-bold text-slate-800">{product.name}</td>
+                  <td className="p-5 text-slate-600">{product.sku}</td>
                   <td className="p-5 font-bold text-slate-800">
                     ${Number(product.price).toFixed(2)}
                   </td>
                   <td className="p-5">
-                    <span
-                      className={
-                        product.currentStock <= product.lowStockThreshold
-                          ? "inline-flex items-center gap-1 rounded-full bg-rose-100 px-3 py-1 text-xs font-bold text-rose-700"
-                          : "inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700"
-                      }
-                    >
-                      {product.currentStock <= product.lowStockThreshold && (
-                        <AlertTriangle size={13} />
-                      )}{" "}
-                      {product.currentStock} in stock
+                    <span className="inline-flex rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-700">
+                      {product.quantity_in_stock} in stock
                     </span>
                   </td>
-                  {canManage && (
-                    <td className="p-5">
-                      <div className="flex justify-end gap-1">
-                        <button
-                          aria-label={`Edit ${product.name}`}
-                          onClick={() => openEdit(product)}
-                          className="rounded-lg p-2 text-indigo-600 hover:bg-indigo-50"
-                        >
-                          <Edit size={18} />
-                        </button>
-                        <button
-                          aria-label={`Delete ${product.name}`}
-                          onClick={() => deleteProduct(product._id)}
-                          className="rounded-lg p-2 text-rose-600 hover:bg-rose-50"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  )}
+                  <td className="p-5">
+                    <div className="flex justify-end gap-1">
+                      <button
+                        onClick={() => openEdit(product)}
+                        className="rounded-lg p-2 text-indigo-600 hover:bg-indigo-50"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() => deleteProduct(product.id)}
+                        className="rounded-lg p-2 text-rose-600 hover:bg-rose-50"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2">
-          <Button
-            variant="secondary"
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-          >
-            Previous
-          </Button>
-          <span className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-600">
-            Page {page} of {totalPages}
-          </span>
-          <Button
-            variant="secondary"
-            disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
-          >
-            Next
-          </Button>
-        </div>
-      )}
-      {(editingId || form.category) && (
+
+      {isModalOpen && (
         <Modal
-          title={editingId ? "Edit product" : "Add product"}
+          title={editingId ? "Edit Product" : "Add Product"}
           onClose={closeForm}
         >
           <form
@@ -288,31 +202,12 @@ const Products = () => {
               onChange={updateField}
             />
             <Input
-              label="SKU"
+              label="SKU / Code"
               name="sku"
               required
               value={form.sku}
               onChange={updateField}
             />
-            <label className="flex flex-col gap-1.5 text-sm font-semibold text-slate-700">
-              Category
-              <select
-                name="category"
-                required
-                value={form.category}
-                onChange={updateField}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-3 font-normal outline-none focus:ring-2 focus:ring-indigo-200"
-              >
-                <option value="" disabled>
-                  Select category
-                </option>
-                {categories.map((category) => (
-                  <option key={category._id} value={category._id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </label>
             <Input
               label="Price"
               name="price"
@@ -324,35 +219,15 @@ const Products = () => {
               onChange={updateField}
             />
             <Input
-              label="Opening stock"
-              name="currentStock"
+              label="Quantity in stock"
+              name="quantity_in_stock"
               type="number"
               min="0"
               required
-              value={form.currentStock}
+              value={form.quantity_in_stock}
               onChange={updateField}
             />
-            <Input
-              label="Low-stock threshold"
-              name="lowStockThreshold"
-              type="number"
-              min="0"
-              required
-              value={form.lowStockThreshold}
-              onChange={updateField}
-            />
-            <label className="sm:col-span-2 flex flex-col gap-1.5 text-sm font-semibold text-slate-700">
-              Description
-              <textarea
-                name="description"
-                required
-                value={form.description}
-                onChange={updateField}
-                rows="3"
-                className="rounded-xl border border-slate-200 p-3 font-normal outline-none focus:ring-2 focus:ring-indigo-200"
-              />
-            </label>
-            <div className="sm:col-span-2 flex justify-end gap-2">
+            <div className="sm:col-span-2 flex justify-end gap-2 mt-4">
               <Button type="button" variant="secondary" onClick={closeForm}>
                 Cancel
               </Button>
