@@ -5,9 +5,9 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Ethara AI POS API',
+      title: 'Ethara Inventory Management System API',
       version: '1.0.0',
-      description: 'API documentation for Ethara AI POS system',
+      description: 'API documentation for Ethara Inventory Management System',
     },
     components: {
       securitySchemes: {
