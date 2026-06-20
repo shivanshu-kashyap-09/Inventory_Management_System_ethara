@@ -19,6 +19,7 @@ pids
 node_modules/
 
 # Environment variables
+backend/.env
 .env
 .env.local
 .env.development.local
