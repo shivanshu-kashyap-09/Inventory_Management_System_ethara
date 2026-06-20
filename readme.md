@@ -36,7 +36,7 @@ Make sure you have [Node.js](https://nodejs.org/) and [MongoDB](https://www.mong
 
 ### 1. Clone the repository
 ```bash
-git clone [<repository-url>](https://github.com/shivanshu-kashyap-09/Inventory_Management_System_ethara.git)
+git clone https://github.com/shivanshu-kashyap-09/Inventory_Management_System_ethara.git
 ```
 
 ### 2. Backend Setup
